@@ -735,7 +735,7 @@ setInterval(()=>{
                     break
                 
                 case "import maze":
-                    let newMaze = prompt("Please enter skin pack URL", "")
+                    let newMaze = prompt("Please enter a maze code", "")
                     if (newMaze != null && !maze.includes(newMaze)){
                         mazes.push(newMaze)
                         mazePacks.push(newMaze)
