@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze</title>
+
+    <link rel="shortcut icon" href="img/logoIcon.png" type="image/x-icon">
+
+    <script src="https://cdn.jsdelivr.net/gh/PsychoGoldfishNG/NewgroundsIO-JS@8c72515/dist/NewgroundsIO.min.js"></script>
+
+    <script src="lib/audio.js"></script>
+    <script src="lib/text.js"></script>
+    <script src="lib/subtitles.js"></script>
+    <script src="lib/menu.js"></script>
+
+    <style>
+        * {
+            image-rendering: pixelated;
+            margin: 0px;
+        }
+
+        .char {
+            transition: opacity 0.5s;
+            position: relative;
+            -webkit-filter: url(#chrom);
+        }
+    </style>
+</head>
+<body style="background-color: black; overflow: hidden;">
+    <div style="width: 512px; height: 512px; position: absolute; left: calc(50vw - 256px); top: calc(50vh - 256px); overflow: hidden;">
+        <div class="walls" style="width: 512px; height: 512px; position: absolute; background-image: url(img/bg.png); transition: top 0.25s ease; background-size: cover;">
+            <div class="leftWall" style="width: 192px; height: 432px; position: absolute; left: 0px; top: 40px; background-image: url(img/walls.png); background-size: 300%;"></div>
+            <div class="rightWall" style="width: 192px; height: 432px; position: absolute; right: 0px; top: 40px; background-image: url(img/walls.png); transform: scaleX(-1); background-size: 300%;"></div>
+            <div class="backWallFar" style="width: 128px; height: 128px; position: absolute; left: 192px; top: 200px; background-image: url(img/hall.png); background-size: cover;"></div>
+            <div class="backWall" style="width: 256px; height: 256px; position: absolute; left: 128px; top: 136px; background-image: url(img/wallnear.png); background-size: cover;"></div>
+        </div>
+        <div class="overlay" style="width: 512px; height: 512px; position: absolute; z-index: 50; background-image: url(img/cubbyOverlay.png); background-size: cover;"></div>
+        <div style="width: 512px; height: 80px; position: absolute; z-index: 120; top: 0px; background-color: black;"></div>
+        <div style="width: 512px; height: 80px; position: absolute; z-index: 120; bottom: 0px; background-color: black;"></div>
+        <div style="height: 512px; width: 20px; position: absolute; z-index: 120; left: 0px; background-color: black;"></div>
+        <div style="height: 512px; width: 20px; position: absolute; z-index: 120; right: 0px; background-color: black;"></div>
+        <div style="position: absolute; bottom: 0px; width: 512px; height: 128px; z-index: 100;">
+            <div class="textboxfar" style="opacity: 0%; filter: blur(2px); margin: auto; margin-top: 4px; transition: opacity 2s; display: flex; width: max-content;"></div>
+            <div class="textbox" style="opacity: 0%; margin: auto; margin-top: -16px; transition: opacity 0.5s; display: flex; width: max-content;"></div>
+        </div>
+
+        <div class="staminaBar" style="height: 256px; width: 10px; background-color: #202040; position: absolute; z-index: 140; left: 10px; top: 128px;">
+            <div class="stamina" style="width: 10px; height: 0px; background-color: #006AB4; position: absolute; bottom: 0px;"></div>
+            <div style="position: absolute; top: 0px; width: 10px; height: 20px; background-image: url(img/bar.png); transform: rotate(180deg); background-size: cover;"></div>
+            <div style="position: absolute; bottom: 0px; width: 10px; height: 20px; background-image: url(img/bar.png); transform: scaleX(-1); background-size: cover;"></div>
+            <div class="staminaText" style="position: absolute; left: 1px; top: 72px; z-index: 140;"></div>
+        </div>
+        <div class="fearBar" style="height: 256px; width: 10px; background-color: #4C0000; position: absolute; z-index: 140; right: 10px; top: 128px;">
+            <div class="fear" style="width: 10px; height: 0px; background-color: #991515; position: absolute; bottom: 0px;"></div>
+            <div style="position: absolute; top: 0px; width: 10px; height: 20px; background-image: url(img/bar.png); transform: rotate(180deg) scaleX(-1); background-size: cover;"></div>
+            <div style="position: absolute; bottom: 0px; width: 10px; height: 20px; background-image: url(img/bar.png); background-size: cover;"></div>
+            <div class="fearText" style="position: absolute; right: 1px; top: 96px; z-index: 140;"></div>
+        </div>
+
+        <div class="timerCont" style="position: absolute; bottom: 54px; width: 512px; z-index: 121;">
+            <div class="timerBlur" style="width: max-content; margin: auto; filter: blur(2px);"></div>
+            <div class="timer" style="width: max-content; margin: auto; margin-top: -16px;"></div>
+        </div>
+        <div class="scoreCont" style="position: absolute; bottom: 24px; width: 512px; z-index: 121;">
+            <div class="scoreBlur" style="width: max-content; margin: auto; filter: blur(2px);"></div>
+            <div class="score" style="width: max-content; margin: auto; margin-top: -16px;"></div>
+        </div>
+        
+        <div class="maps" style="position: absolute; z-index: 100; width: 1024px; height: 1024px; transition: height 0.25s ease, width 0.25s ease;">
+            <div class="map" style="position: absolute; z-index: 100; background-image: url(img/map.png); background-size: 128px; bottom: 128px; right: 64px; padding: 4px; width: 120px; height: 120px;"></div>
+            <div style="position: absolute; z-index: 101; background-image: url(img/maphand.png); background-size: cover; bottom: 72px; right: 64px; width: 128px; height: 184px;"></div>
+        </div>
+        <div class="die" style="width: 512px; height: 512px; position: absolute; z-index: 1000; background-color: rgba(0, 0, 0, 0.75); color: white; display: none;">
+            <div class="gameovertext" style="width: max-content; margin: auto; margin-top: 240px;"></div>
+        </div>
+        <div class="title" style="position: absolute; z-index: 100000; width: 512px; height: 512px; background-color: black;">
+            <div class="select" style="width: 256px; position: absolute; bottom: 280px; left: 128px;"></div>
+            <div class="controls" style="width: 256px; position: absolute; bottom: 192px; left: 128px;"></div>
+            <div style="background-image: url(img/logo.png); width: 128px; height: 184px; position: absolute; left: 192px; bottom: 0px; background-size: cover;"></div>
+        </div>
+        <div class="credits" style="position: absolute; z-index: 100000; width: 512px; height: 512px; display: none;">
+            <div class="creditsText" style="width: 512px; background-color: black;"></div>
+        </div>
+
+        <div class="loadZoneDeluxe" style="position: absolute; width: 512px; height: 512px; top: calc(50% - 256px); left: calc(50% - 256px); z-index: 1000000; background-color: black;">
+        <div class="assetCount" style="width: max-content; margin: auto; margin-top: 240px;"></div>
+    </div>
+    <script>
+        let toload = 47
+        let loaded = 0
+        let loadLoop = setInterval(function(){
+            document.querySelector(".assetCount").innerHTML = renderStrings(["Loading...", loaded + " of " + toload])
+
+            if (loaded >= toload - (27*mobile)){
+                setTimeout(function(){
+                    document.querySelector(".loadZoneDeluxe").style.display = "none"
+                }, 500)
+                clearInterval(loadLoop)
+                return
+            }
+        }, 10)
+    </script>
+    <div class="loadZone" style="display: none;">
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/far/areYouLost.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/far/comeBackHere.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/far/divideAndConquer.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/far/dontRun.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/far/iWontHurtYou.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/far/whereAreYou.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/areYouLost.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/comeBackHere.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/divideAndConquer.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/dontRun.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/ending1.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/ending2.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/ending3.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/ending4.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/ending5.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/ending6.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/iWontHurtYou.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/dialogue/whereAreYou.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/breath.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/credits.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/fall.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/mapClose.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/mapOpen.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/recovery.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/snd_laughtrack_short.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/step.mp3"></audio>
+        <audio oncanplaythrough="loaded++" preload="auto" src="audio/stepEvil.mp3"></audio>
+        <img onload="loaded++" src="img/font/default.png">
+        <img onload="loaded++" src="img/bar.png">
+        <img onload="loaded++" src="img/bg.png">
+        <img onload="loaded++" src="img/cubbyOverlay.png">
+        <img onload="loaded++" src="img/doornear.png">
+        <img onload="loaded++" src="img/logo.png">
+        <img onload="loaded++" src="img/logoIcon.png">
+        <img onload="loaded++" src="img/map.png">
+        <img onload="loaded++" src="img/maphand.png">
+        <img onload="loaded++" src="img/monsterfar.png">
+        <img onload="loaded++" src="img/monsternear.png">
+        <img onload="loaded++" src="img/tesco.png">
+        <img onload="loaded++" src="img/touchButtA.png">
+        <img onload="loaded++" src="img/touchButtB.png">
+        <img onload="loaded++" src="img/touchButtD.png">
+        <img onload="loaded++" src="img/touchButtL.png">
+        <img onload="loaded++" src="img/touchButtR.png">
+        <img onload="loaded++" src="img/touchButtU.png">
+        <img onload="loaded++" src="img/wallnear.png">
+        <img onload="loaded++" src="img/walls.png">
+    </div>
+    </div>
+    <div class="touchButt" style="position: absolute; z-index: 200000; width: 100vw; height: 100vh; display: none;">
+        <div class="touchButtA" style="width: 64px; height: 64px; position: absolute; left: 8px; bottom: 8px; background-image: url(img/touchButtA.png); border-radius: 32px;"></div>
+        <div class="touchButtB" style="width: 64px; height: 64px; position: absolute; left: 80px; bottom: 8px; background-image: url(img/touchButtB.png); border-radius: 32px;"></div>
+        <div class="touchButtL" style="width: 64px; height: 64px; position: absolute; right: 152px; bottom: 8px; background-image: url(img/touchButtL.png); border-radius: 32px;"></div>
+        <div class="touchButtR" style="width: 64px; height: 64px; position: absolute; right: 8px; bottom: 8px; background-image: url(img/touchButtR.png); border-radius: 32px;"></div>
+        <div class="touchButtU" style="width: 64px; height: 64px; position: absolute; right: 80px; bottom: 80px; background-image: url(img/touchButtU.png); border-radius: 32px;"></div>
+        <div class="touchButtD" style="width: 64px; height: 64px; position: absolute; right: 80px; bottom: 8px; background-image: url(img/touchButtD.png); border-radius: 32px;"></div>
+    </div>
+
+    <script>
+        document.querySelector(".staminaText").innerHTML = renderStrings("stamina")
+        document.querySelector(".fearText").innerHTML = renderStrings("fear")
+        document.querySelector(".controls").innerHTML = renderStrings(["[z] to confirm", "[arrow keys] to select"])
+    </script>
+
+    <svg width="0" height="0">
+    <filter id="chrom">
+        <feColorMatrix type="matrix" 
+            result="red_"             
+            values="4 0 0 0 0
+                    0 0 0 0 0 
+                    0 0 0 0 0 
+                    0 0 0 1 0"/>
+        <feOffset in="red_" dx="1" dy="0" result="red"/>
+        <feColorMatrix type="matrix" 
+            in="SourceGraphic"             
+            result="blue_"             
+            values="0 0 0 0 0
+                    0 3 0 0 0 
+                    0 0 10 0 0 
+                    0 0 0 1 0"/>
+        <feOffset in="blue_" dx="-1" dy="0" result="blue"/>    
+        <feBlend mode="screen" in="red" in2="blue"/>
+    </filter>
+    </svg>
+    <!-- Chromatic Aberration by Amagi (@fand) code https://codepen.io/fand/pen/EgGwjg-->
+
+    <script src="lib/KBnM.js"></script>
+    <script src="lib/credits.js"></script>
+    <script src="script.js"></script>
+    <script src="nginit.js"></script>
+</body>
+</html>

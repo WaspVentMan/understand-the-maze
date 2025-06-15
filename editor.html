@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Editor</title>
+
+    <link rel="shortcut icon" href="img/logoIcon.png" type="image/x-icon">
+</head>
+<body>
+    <p>Import Maze String</p>
+    <input type="text" class="mapImport" value="">
+    <button onclick="maze = JSON.parse(atob(document.querySelector('.mapImport').value)); renderMap(); document.querySelector('.mapName').value = maze.name">Submit</button>
+    <br><br>
+    <p>Maze Name</p>
+    <input type="text" class="mapName" value="Familiar Place">
+    <button onclick="maze.name = document.querySelector('.mapName').value">Submit</button>
+    <br><br>
+    <div class="map"></div>
+    <button onclick="mazeToString()">Export</button>
+    <p class="exportText" style="display: none;"></p>
+    <script>
+        let maze = JSON.parse(atob("eyJuYW1lIjoiRmFtaWxpYXIgUGxhY2UiLCJtYXplIjpbIjAwMDAwMDAwMDAwMDAwMDAwMDAiLCIwMDAwMDAwMDAwMDAwMDAwMDAwIiwiMDAxMTExMTIxMTEyMTExMTEwMCIsIjAwMTAwMDAwMDAwMDAwMDAxMDAiLCIwMDEwMTExMDExMTAxMTEwMTAwIiwiMDAyMDAwMTAwMDIwMDAwMDIwMCIsIjAwMTAxMDEwMTAxMTEwMTAxMDAiLCIwMDEwMTAwMDEwMDAwMDEwMTAwIiwiMDAxMDEwMTExMjEwMTExMDEwMCIsIjAwMjAwMDIwMDAwMDIwMDAyMDAiLCIwMDEwMTExMDExMTExMDEwMTAwIiwiMDAyMDAwMjAwMDAwMDAxMDEwMCIsIjAwMTAxMDEwMTExMDEwMTAxMDAiLCIwMDEwMTAwMDEwMDAyMDEwMTAwIiwiMDAxMDExMTAxMDExMTAxMDEwMCIsIjAwMTAwMDAwMDAwMDAwMDAxMDAiLCIwMDExMTExMTEyMTExMjExMTAwIiwiMDAwMDAwMDAwMDAwMDAwMDAwMCIsIjAwMDAwMDAwMDAwMDAwMDAwMDAiXX0="))
+        function renderMap(){
+            let grid = ""
+            for (let x = 0; x < maze.maze.length; x++){
+                if (x < 2){continue}
+                grid += `<div style="width: max-content; height: 16px; display: flex; text-align: center">`
+                for (let y = 0; y < maze.maze[x].length; y++){
+                    if (y < 2){continue}
+                    grid += `<div onclick="alterTile(${x}, ${y})" style="width: 16px; height: 16px; background-color: `
+                    if (maze.maze[x][y] == 1){
+                        grid += "#000"
+                    } else if (maze.maze[x][y] == 2){
+                        grid += "#888"
+                    }
+                    grid += `;"></div>`
+                }
+                grid += `</div>`
+            }
+
+            document.querySelector(".map").innerHTML = grid
+        }
+        renderMap()
+
+        function alterTile(x, y){
+            console.log(x)
+            console.log(y)
+            console.log(maze.maze[x][y])
+            if (x <= 1 || y <= 1 || x >= 17 || y >= 17){
+                return
+            }
+
+            maze.maze[x] = maze.maze[x].split("")
+            
+            if (x == 2 || y == 2 || x == 16 || y == 16){
+                if (maze.maze[x][y] == "1"){
+                    maze.maze[x][y] = "2"
+                } else {
+                    maze.maze[x][y] = "1"
+                }
+            } else {
+                console.log("non edge tile")
+                if (maze.maze[x][y] == "0"){
+                    console.log("0")
+                    maze.maze[x][y] = "1"
+                } else if (maze.maze[x][y] == "1"){
+                    console.log("1")
+                    maze.maze[x][y] = "2"
+                } else if (maze.maze[x][y] == "2"){
+                    console.log("2")
+                    maze.maze[x][y] = "0"
+                }
+            }
+
+            maze.maze[x] = maze.maze[x].join("")
+            console.log(maze.maze[x][y])
+
+            renderMap()
+        }
+    
+        function mazeToString(){
+            navigator.clipboard.writeText(btoa(JSON.stringify(maze)))
+        }
+    </script>
+</body>
+</html>
